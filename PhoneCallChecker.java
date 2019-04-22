@@ -37,16 +37,16 @@ public class PhoneCallChecker extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent)
     {
         try {
-            if (intent.getAction().equals("android.intent.action.NEW_OUTGOING_CALL")) {
-                number = intent.getExtras().getString("android.intent.extra.PHONE_NUMBER");
-                if (number.length() == 8) {
+            if (intent.getAction().equals("android.intent.action.NEW_OUTGOING_CALL")) { //checks if outgoing call is intiated
+                number = intent.getExtras().getString("android.intent.extra.PHONE_NUMBER"); //obtains number of yser we are trying to call
+                if (number.length() == 8) { //verification of number
                     if (!(number.charAt(0) == '2' || number.charAt(0) == '3' || number.charAt(0) == '4' || number.charAt(0) == '5' || number.charAt(0) == '6' || number.charAt(0) == '7'))
                         Toast.makeText(context, "Wrong Landline Number", Toast.LENGTH_LONG).show();
                 } else if (number.length() == 10) {
                     if (!(number.charAt(0) == '9' || number.charAt(0) == '8' || number.charAt(0) == '7' || number.charAt(0) == '6'))
                         Toast.makeText(context, "Wrong Mobile Number", Toast.LENGTH_LONG).show();
                 }
-                boolean isEmergencyNumber = PhoneNumberUtils.isEmergencyNumber(number);
+                boolean isEmergencyNumber = PhoneNumberUtils.isEmergencyNumber(number); //checks if an emergency number is used
                 if(isEmergencyNumber)
                     Toast.makeText(context, "Emergency Number", Toast.LENGTH_LONG).show();
 
@@ -65,8 +65,8 @@ public class PhoneCallChecker extends BroadcastReceiver {
         }
 
         switch (state) {
-            case TelephonyManager.CALL_STATE_OFFHOOK:
-                if(lastState != TelephonyManager.CALL_STATE_RINGING){
+            case TelephonyManager.CALL_STATE_OFFHOOK: //Call gets picked 
+                if(lastState == TelephonyManager.CALL_STATE_RINGING){
                     isIncoming = false;
                     callStartTime = new Date();
                     Toast.makeText(context, "Outgoing Call Started" , Toast.LENGTH_SHORT).show();
@@ -79,14 +79,15 @@ public class PhoneCallChecker extends BroadcastReceiver {
                     //Ring but no pickup-  a miss
                     Toast.makeText(context, "Ringing but no pickup" + savedNumber + " Call time " + callStartTime + " Date " + new Date(), Toast.LENGTH_SHORT).show();
                 } else {
-
-                    Toast.makeText(context, "outgoing " + savedNumber + " Call time " + callStartTime + " Date " + new Date(), Toast.LENGTH_SHORT).show();
+                    //Call didn't connect
+                    Toast.makeText(context, "Network Issue", Toast.LENGTH_SHORT).show();
                 }
                 break;
             }
 
             case TelephonyManager.SIM_STATE_ABSENT:
-                Toast.makeText(context, "Phone is outside coverage area", Toast.LENGTH_SHORT).show();
+                if(lastState == TelephonyManager.CALL_STATE_RINGING)
+                    Toast.makeText(context, "Phone is outside coverage area", Toast.LENGTH_SHORT).show();
                 break;
 
             case TelephonyManager.SIM_STATE_NOT_READY:
