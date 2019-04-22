@@ -57,12 +57,13 @@ public class PhoneCallChecker extends BroadcastReceiver {
             e.printStackTrace();
         }
     }
+    @Override
     public void onCallStateChanged(Context context, int state, String number) {
         if(lastState == state){
             //No change, debounce extras
             return;
         }
-        
+
         switch (state) {
             case TelephonyManager.CALL_STATE_OFFHOOK:
                 if(lastState != TelephonyManager.CALL_STATE_RINGING){
@@ -72,17 +73,26 @@ public class PhoneCallChecker extends BroadcastReceiver {
                 }
 
                 break;
-            case TelephonyManager.CALL_STATE_IDLE:
+            case TelephonyManager.CALL_STATE_IDLE: {
                 //Went to idle-  this is the end of a call.  What type depends on previous state(s)
-                if(lastState == TelephonyManager.CALL_STATE_RINGING){
+                if (lastState == TelephonyManager.CALL_STATE_RINGING) {
                     //Ring but no pickup-  a miss
-                    Toast.makeText(context, "Ringing but no pickup" + savedNumber + " Call time " + callStartTime +" Date " + new Date() , Toast.LENGTH_SHORT).show();
-                }
-                else{
+                    Toast.makeText(context, "Ringing but no pickup" + savedNumber + " Call time " + callStartTime + " Date " + new Date(), Toast.LENGTH_SHORT).show();
+                } else {
 
-                    Toast.makeText(context, "outgoing " + savedNumber + " Call time " + callStartTime +" Date " + new Date() , Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "outgoing " + savedNumber + " Call time " + callStartTime + " Date " + new Date(), Toast.LENGTH_SHORT).show();
                 }
                 break;
+            }
+
+            case TelephonyManager.SIM_STATE_ABSENT:
+                Toast.makeText(context, "Phone is outside coverage area", Toast.LENGTH_SHORT).show();
+                break;
+
+            case TelephonyManager.SIM_STATE_NOT_READY:
+                Toast.makeText(context, "Phone or Network is busy", Toast.LENGTH_SHORT).show();
+                break;
+
         }
         lastState = state;
     }
